@@ -30,7 +30,16 @@ export class SessionsService {
 
   async book(dto: CreateSessionDto) {
     // TODO (examen): detectar solapes por roomId y por userId mediante QueryBuilder y lanzar SESSION_OVERLAP
-    // throw new BadRequestException({ message: 'Session overlap', code: 'SESSION_OVERLAP', details: [{ conflictWithSessionId: '...' }] });
+    const solapeRoomId = await this.sessionRepo.findOne({ where: { id: dto.roomId } });
+    if (!(solapeRoomId.startAt < existingEnd) && (solapeRoomId.endAt > existingStart)) {
+      throw new BadRequestException({ message: 'Session overlap', code: 'SESSION_OVERLAP', details: [{ conflictWithSessionId: 'Hubo un conflicto con el id de la room' }] });
+    };
+
+    const solapeUserId = await this.sessionRepo.findOne({ where: { id: dto.userId } });
+    if (!(solapeUserId.startAt < existingEnd) && (solapeUserId.endAt > existingStart)) {
+      throw new BadRequestException({ message: 'Session overlap', code: 'SESSION_OVERLAP', details: [{ conflictWithSessionId: 'Hubo un conflicto con el id del usuario' }] });
+    };
+    
     const room = await this.roomRepo.findOne({ where: { id: dto.roomId } });
     if (!room) {
       throw new BadRequestException({ message: 'Invalid room', code: 'INVALID_ROOM' });
