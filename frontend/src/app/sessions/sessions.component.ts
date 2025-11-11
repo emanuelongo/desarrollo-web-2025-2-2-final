@@ -49,6 +49,16 @@ export class SessionsComponent implements AfterViewInit {
   displayedColumns = ['room', 'start', 'end', 'status', 'action'];
   dataSource = new MatTableDataSource<Session>([]);
 
+  validacionesForm: FormGroup;
+  constructor(){
+    this.validacionesForm = new FormGroup(
+      roomId: new FormControl('', Validators.required);
+      start: new FormControl('', Validators.required);
+      end: new FormControl('', Validators.required);
+    )
+  }
+
+
   // Filtros
   roomIdControl = new FormControl<string | null>(null);
   dateRangeGroup = new FormGroup({

@@ -7,6 +7,7 @@ type JwtPayload = { exp?: number; roles?: string[] };
 
 export const authGuard: CanActivateFn = (route) => {
   const snack = inject(MatSnackBar);
+  const router =inject(Router);
 
   // TODO: Ajustar si el token se almacena en otra clave
   const token = localStorage.getItem('token');
@@ -15,7 +16,7 @@ export const authGuard: CanActivateFn = (route) => {
   // Sin token → redirigir a login
   if (!token) {
     snack.open('Sesión inválida o expirada. Inicia sesión.', 'Cerrar', { duration: 3000 });
-    
+    this.router.navigate('login')
     return false;
   }
 
@@ -26,6 +27,7 @@ export const authGuard: CanActivateFn = (route) => {
     if (payload.exp && payload.exp * 1000 <= Date.now()) {
       snack.open('Sesión expirada. Inicia sesión nuevamente.', 'Cerrar', { duration: 3000 });
       // TODO: Redirigir a login
+      this.router.navigate('login')
       return false;
     }
 

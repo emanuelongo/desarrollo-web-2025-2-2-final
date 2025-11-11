@@ -28,9 +28,21 @@ export class SessionsService {
     return qb.getMany();
   }
 
-  async book(dto: CreateSessionDto) {
+  async book(dto: CreateSessionDto(), params?: { roomId?: string; start?: string; end?: string; id?: number }) {
     // TODO (examen): detectar solapes por roomId y por userId mediante QueryBuilder y lanzar SESSION_OVERLAP
-    // throw new BadRequestException({ message: 'Session overlap', code: 'SESSION_OVERLAP', details: [{ conflictWithSessionId: '...' }] });
+
+    const { roomId, start, end, id } = params ?? {};
+    const qb = this.sessionRepo.createQueryBuilder('s');
+    if (roomId) qb.andWhere('s.roomId = :roomId', { roomId });
+    if (id) qb.andWhere('s.id = :userId', { id });
+    if (start) qb.andWhere('s.endAt >= :start', { start: new Date(start).getMilliseconds });
+    if (end) qb.andWhere('s.startAt <= :end', { end: new Date(end).getMilliseconds });
+    qb.orderBy('s.startAt', 'ASC');
+    
+    if (!(start < existingEnd) && (end > existingStart)) {
+      throw new BadRequestException({ message: 'Session overlap', code: 'SESSION_OVERLAP', details: [{ conflictWithSessionId: 'Hubo un conflicto con el id de la room' }] });
+    };
+    
     const room = await this.roomRepo.findOne({ where: { id: dto.roomId } });
     if (!room) {
       throw new BadRequestException({ message: 'Invalid room', code: 'INVALID_ROOM' });

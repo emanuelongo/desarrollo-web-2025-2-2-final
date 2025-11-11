@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException, ForbiddenException, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { JwtService } from '@nestjs/jwt';
@@ -26,6 +26,9 @@ export class RolesGuard implements CanActivate {
     try {
       // Verificar firma y expiración estándar
       const payload = this.jwt.verify(token);
+      if (!payload){
+        throw new UnauthorizedException('Expiró el token');
+      }
 
       // Validar roles si se requieren
       if (requiredRoles.length > 0) {
@@ -33,6 +36,8 @@ export class RolesGuard implements CanActivate {
         const ok = requiredRoles.every((r) => roles.includes(r));
         if (!ok) throw new ForbiddenException('Insufficient role');
       }
+
+      @SetMetadata('roles', [ForbiddenException('Insufficient role')]);
 
       return true;
     } catch (err) {
